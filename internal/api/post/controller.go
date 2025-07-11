@@ -17,3 +17,30 @@ func NewImplementation(postService service.PostService, commentService service.C
 		commentService: commentService,
 	}
 }
+
+/*
+func (UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostRequest) (*Post, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePost not implemented")
+}
+func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) (*Post, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
+}
+func (UnimplementedPostServiceServer) UpdatePost(context.Context, *UpdatePostRequest) (*Post, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePost not implemented")
+}
+func (UnimplementedPostServiceServer) DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePost not implemented")
+}
+func (UnimplementedPostServiceServer) AddLike(context.Context, *AddLikeRequest) (*Like, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddLike not implemented")
+}
+func (UnimplementedPostServiceServer) AddComment(context.Context, *AddCommentRequest) (*Comment, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
+}
+func (UnimplementedPostServiceServer) RemoveLike(context.Context, *RemoveLikeRequest) (*RemoveLikeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveLike not implemented")
+}
+func (UnimplementedPostServiceServer) RemoveComment(context.Context, *RemoveCommentRequest) (*RemoveCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveComment not implemented")
+}
+*/

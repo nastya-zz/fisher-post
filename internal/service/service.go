@@ -7,7 +7,7 @@ import (
 )
 
 type PostService interface {
-	CreatePost(ctx context.Context, post *model.Post) (*model.Post, error)
+	CreatePost(ctx context.Context, post *model.CreatePost) (*model.Post, error)
 	UpdatePost(ctx context.Context, post *model.Post) (*model.Post, error)
 	GetPost(ctx context.Context, id uuid.UUID) (*model.Post, error)
 	DeletePost(ctx context.Context, id uuid.UUID) error

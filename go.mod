@@ -8,7 +8,7 @@ require (
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/joho/godotenv v1.5.1
-	github.com/nastya-zz/fisher-protocols v0.0.16
+	github.com/nastya-zz/fisher-protocols v0.0.18
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.73.0
 

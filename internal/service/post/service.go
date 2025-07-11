@@ -14,7 +14,7 @@ type serv struct {
 	txManager  db.TxManager
 }
 
-func (s serv) CreatePost(ctx context.Context, post *model.Post) (*model.Post, error) {
+func (s serv) CreatePost(ctx context.Context, post *model.CreatePost) (*model.Post, error) {
 	//TODO implement me
 	panic("implement me")
 }

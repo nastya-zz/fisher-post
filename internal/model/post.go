@@ -26,17 +26,26 @@ type Geolocation struct {
 	Longitude float64
 }
 
+type CreatePost struct {
+	UserID        uuid.UUID
+	Description   string
+	Geolocation   Geolocation
+	Media         []string
+	FishTypeIDs   []int
+	TackleTypeIDs []int
+}
+
 type Post struct {
-	ID          uuid.UUID
-	User        user
-	Description string
-	geolocation Geolocation
-	CreatedAt   time.Time
-	Media       []media
-	Likes       int
-	Comments    []Comment
-	FishType    []Dictionary
-	TackleType  []Dictionary
+	ID            uuid.UUID
+	User          user
+	Description   string
+	Geolocation   Geolocation
+	CreatedAt     time.Time
+	Media         []media
+	LikesCount    int
+	CommentsCount int
+	FishTypes     []Dictionary
+	TackleTypes   []Dictionary
 }
 
 func GetUuid[T ~string](id T) (uuid.UUID, error) {
