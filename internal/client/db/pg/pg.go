@@ -2,10 +2,12 @@ package pg
 
 import (
 	"context"
+
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+
 	"post/internal/client/db"
 	"post/internal/client/db/prettier"
 	"post/pkg/logger"

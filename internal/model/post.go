@@ -1,11 +1,12 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-type user struct {
+type User struct {
 	ID        uuid.UUID
 	Username  string
 	AvatarUrl string
@@ -14,7 +15,7 @@ type user struct {
 const MediaTypePhoto = "PHOTO"
 const MediaTypeVideo = "VIDEO"
 
-type media struct {
+type Media struct {
 	ID           uuid.UUID
 	MediaType    string
 	Url          string
@@ -30,18 +31,17 @@ type CreatePost struct {
 	UserID        uuid.UUID
 	Description   string
 	Geolocation   Geolocation
-	Media         []string
 	FishTypeIDs   []int
 	TackleTypeIDs []int
 }
 
 type Post struct {
 	ID            uuid.UUID
-	User          user
+	User          User
 	Description   string
 	Geolocation   Geolocation
 	CreatedAt     time.Time
-	Media         []media
+	Media         []Media
 	LikesCount    int
 	CommentsCount int
 	FishTypes     []Dictionary

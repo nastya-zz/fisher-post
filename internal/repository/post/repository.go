@@ -2,19 +2,49 @@ package post
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"post/internal/client/db"
 	"post/internal/model"
 	"post/internal/repository"
+
+	"github.com/google/uuid"
+)
+
+const (
+	postIdColumn = "post_id"
+)
+
+const (
+	postsTable        = "posts"
+	userIdColumn      = "user_id"
+	descriptionColumn = "description"
+	latitudeColumn    = "latitude"
+	longitudeColumn   = "longitude"
+	createdAtColumn   = "created_at"
+	updatedAtColumn   = "updated_at"
+)
+
+const (
+	postFishTable = "post_fish"
+	fishIdColumn  = "fish_id"
+)
+
+const (
+	postTackleTable = "post_tackle"
+	tackleIdColumn  = "tackle_id"
+)
+
+const (
+	mediaTable           = "media"
+	mediaIdColumn        = "media_id"
+	mediaUrlColumn       = "url"
+	thumbnailUrlColumn   = "thumbnail_url"
+	mediaTypeColumn      = "media_type"
+	mediaSizeColumn      = "size"
+	mediaCreatedAtColumn = "created_at"
 )
 
 type repo struct {
 	db db.Client
-}
-
-func (r repo) Create(ctx context.Context, post *model.Post) (*model.Post, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (r repo) Update(ctx context.Context, post *model.Post) (*model.Post, error) {

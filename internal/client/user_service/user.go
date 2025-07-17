@@ -21,10 +21,12 @@ type Client struct {
 }
 type userService struct {
 	cl desc.UserV1Client
+	conn *grpc.ClientConn
 }
 
 type ServiceClient interface {
 	GetUser(ctx context.Context, token string, id uuid.UUID) (*desc.GetProfileResponse, error)
+	Close() error
 }
 
 func New(ctx context.Context) (ServiceClient, error) {
@@ -36,12 +38,12 @@ func New(ctx context.Context) (ServiceClient, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial GRPC client: %w", err)
 	}
-	defer func() { _ = conn.Close() }()
 
 	cl := desc.NewUserV1Client(conn)
 
 	return &userService{
-		cl: cl,
+		cl:   cl,
+		conn: conn,
 	}, nil
 }
 
@@ -58,4 +60,12 @@ func (userService userService) GetUser(ctx context.Context, token string, id uui
 	}
 
 	return profile, nil
+}
+
+func (userService userService) Close() error {
+	if userService.cl != nil {
+		userService.conn.Close()
+	}
+
+	return nil
 }

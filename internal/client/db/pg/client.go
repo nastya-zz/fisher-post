@@ -2,11 +2,12 @@ package pg
 
 import (
 	"context"
-	"post/internal/client/db"
-	"post/pkg/logger"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
+
+	"post/internal/client/db"
+	"post/pkg/logger"
 )
 
 type pgClient struct {

@@ -8,6 +8,7 @@ import (
 
 	"post/internal/model"
 	repoModel "post/internal/repository/post/model"
+	"post/pkg/logger"
 )
 
 func (s serv) CreatePost(ctx context.Context, post *model.CreatePost) (*model.Post, error) {
@@ -26,6 +27,7 @@ func (s serv) CreatePost(ctx context.Context, post *model.CreatePost) (*model.Po
 			errTx = s.repository.CreatePostFishReference(ctx, createdPost.ID, fishId)
 		}
 		if errTx != nil {
+			logger.Error("failed to create post fish reference", "error", errTx)
 			return fmt.Errorf("%s %w", op, errTx)
 		}
 
@@ -33,11 +35,13 @@ func (s serv) CreatePost(ctx context.Context, post *model.CreatePost) (*model.Po
 			errTx = s.repository.CreatePostTackleReference(ctx, createdPost.ID, tackleId)
 		}
 		if errTx != nil {
+			logger.Error("failed to create post tackle reference", "error", errTx)
 			return fmt.Errorf("%s %w", op, errTx)
 		}
 
 		userResponse, err := s.userService.GetUser(ctx, "", createdPost.UserID)
 		if err != nil {
+			logger.Error("failed to get user", "error", err)
 			return fmt.Errorf("%s %w", op, fmt.Errorf("failed to get user: %w", err))
 		}
 

@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx"
+
 	"post/internal/client/db"
 	"post/internal/model"
 	repoModel "post/internal/repository/post/model"
 	"post/pkg/logger"
-
-	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx"
 )
 
 func (r repo) CreatePost(ctx context.Context, post *model.CreatePost) (*repoModel.CreatedPost, error) {
@@ -18,6 +19,7 @@ func (r repo) CreatePost(ctx context.Context, post *model.CreatePost) (*repoMode
 
 	builder := sq.Insert(postsTable).
 		Columns(userIdColumn, descriptionColumn, latitudeColumn, longitudeColumn).
+		PlaceholderFormat(sq.Dollar).
 		Values(post.UserID, post.Description, post.Geolocation.Latitude, post.Geolocation.Longitude).
 		Suffix("RETURNING *")
 

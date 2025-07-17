@@ -14,6 +14,7 @@ func (r repo) CreatePostTackleReference(ctx context.Context, postId uuid.UUID, t
 	const op = "repository.post.CreatePostTackleReference"
 
 	builder := sq.Insert(postTackleTable).
+		PlaceholderFormat(sq.Dollar).
 		Columns(postIdColumn, tackleIdColumn).
 		Values(postId, tackleId)
 

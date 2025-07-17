@@ -14,6 +14,7 @@ func (r repo) CreatePostFishReference(ctx context.Context, postId uuid.UUID, fis
 	const op = "repository.post.CreateReferenceFish"
 
 	builder := sq.Insert(postFishTable).
+		PlaceholderFormat(sq.Dollar).
 		Columns(postIdColumn, fishIdColumn).
 		Values(postId, fishId)
 

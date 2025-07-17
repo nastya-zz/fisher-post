@@ -2,20 +2,21 @@ package app
 
 import (
 	"context"
+
 	"post/internal/api/post"
 	"post/internal/client/db"
 	"post/internal/client/db/pg"
+	userservice "post/internal/client/user_service"
 	"post/internal/closer"
 	"post/internal/config"
 	"post/internal/repository"
-	"post/internal/service"
-	commentService "post/internal/service/comment"
-	"post/internal/transaction"
-	"post/pkg/logger"
-
 	commentRepository "post/internal/repository/comment"
 	postRepository "post/internal/repository/post"
+	"post/internal/service"
+	commentService "post/internal/service/comment"
 	postService "post/internal/service/post"
+	"post/internal/transaction"
+	"post/pkg/logger"
 )
 
 type serviceProvider struct {
@@ -25,6 +26,7 @@ type serviceProvider struct {
 
 	//rmqClient       broker.ClientMsgBroker
 	dbClient          db.Client
+	userServiceClient userservice.ServiceClient
 	txManager         db.TxManager
 	postRepository    repository.PostRepository
 	commentRepository repository.CommentRepository
@@ -97,6 +99,19 @@ func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	return s.dbClient
 }
 
+func (s *serviceProvider) UserServiceClient(ctx context.Context) userservice.ServiceClient {
+	if s.userServiceClient == nil {
+		userServiceClient, err := userservice.New(ctx)
+		if err != nil {
+			logger.Fatal("failed to create user service client", "error", err)
+		}
+		closer.Add(userServiceClient.Close)
+		s.userServiceClient = userServiceClient
+	}
+
+	return s.userServiceClient
+}
+
 func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 	if s.txManager == nil {
 		s.txManager = transaction.NewTransactionManager(s.DBClient(ctx).DB())
@@ -126,6 +141,7 @@ func (s *serviceProvider) PostService(ctx context.Context) service.PostService {
 		s.postService = postService.New(
 			s.PostRepository(ctx),
 			s.TxManager(ctx),
+			s.UserServiceClient(ctx),
 		)
 	}
 

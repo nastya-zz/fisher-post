@@ -13,4 +13,5 @@ type CreatedPost struct {
 	Latitude    float64   `db:"latitude"`
 	Longitude   float64   `db:"longitude"`
 	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
 }
