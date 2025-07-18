@@ -2,15 +2,14 @@ package post
 
 import (
 	"context"
-	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
 	desc "github.com/nastya-zz/fisher-protocols/gen/post_v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"post/internal/converter"
 	"post/internal/model"
 	"post/pkg/logger"
 )
@@ -47,13 +46,14 @@ func (i *Implementation) CreatePost(ctx context.Context, req *desc.CreatePostReq
 
 	return &desc.Post{
 		Id:            createdPost.ID.String(),
+		User:          converter.FromModelUserToDescUser(createdPost.User),
 		Description:   createdPost.Description,
 		Location:      req.Location,
-		Media:         FromModelMediaToDescMedia(createdPost.Media),
+		Media:         converter.FromModelMediaToDescMedia(createdPost.Media),
 		LikesCount:    int32(createdPost.LikesCount),
 		CommentsCount: int32(createdPost.CommentsCount),
-		FishTypes:     FromFishTypesToDescFishTypes(createdPost.FishTypes),
-		TackleTypes:   FromFishTypesToDescTackleType(createdPost.TackleTypes),
+		FishTypes:     converter.FromFishTypesToDescFishTypes(createdPost.FishTypes),
+		TackleTypes:   converter.FromFishTypesToDescTackleType(createdPost.TackleTypes),
 		CreatedAt:     timestamppb.New(createdPost.CreatedAt),
 	}, nil
 }
@@ -80,64 +80,6 @@ func getIntList(list []int32) []int {
 
 	for _, v := range list {
 		result = append(result, int(v))
-	}
-
-	return result
-}
-
-func FromFishTypesToDescFishTypes(list []model.Dictionary) []*desc.FishType {
-	result := make([]*desc.FishType, 0, len(list))
-
-	for _, v := range list {
-		result = append(result, &desc.FishType{
-			Id:          strconv.Itoa(v.ID),
-			Name:        v.Name,
-			Description: v.Description,
-		})
-	}
-
-	return result
-}
-
-func FromFishTypesToDescTackleType(list []model.Dictionary) []*desc.TackleType {
-	result := make([]*desc.TackleType, 0, len(list))
-
-	for _, v := range list {
-		result = append(result, &desc.TackleType{
-			Id:          strconv.Itoa(v.ID),
-			Name:        v.Name,
-			Description: v.Description,
-		})
-	}
-
-	return result
-}
-
-func FromDescMediaToModelMedia(list []*desc.Media) []*model.Media {
-	result := make([]*model.Media, 0, len(list))
-
-	for _, v := range list {
-		result = append(result, &model.Media{
-			ID:           uuid.MustParse(v.Id),
-			MediaType:    v.Type.String(),
-			Url:          v.Url,
-			ThumbnailUrl: v.ThumbnailUrl,
-		})
-	}
-
-	return result
-}
-
-func FromModelMediaToDescMedia(list []model.Media) []*desc.Media {
-	result := make([]*desc.Media, 0, len(list))
-
-	for _, v := range list {
-		result = append(result, &desc.Media{
-			Id:           v.ID.String(),
-			Type:         desc.MediaType(desc.MediaType_value[v.MediaType]),
-			Url:          v.Url,
-			ThumbnailUrl: v.ThumbnailUrl,
-		})
 	}
 
 	return result
