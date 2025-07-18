@@ -2,6 +2,7 @@ package post
 
 import (
 	desc "github.com/nastya-zz/fisher-protocols/gen/post_v1"
+
 	"post/internal/service"
 )
 
@@ -9,12 +10,14 @@ type Implementation struct {
 	desc.UnimplementedPostServiceServer
 	postService    service.PostService
 	commentService service.CommentService
+	likeService    service.LikeService
 }
 
-func NewImplementation(postService service.PostService, commentService service.CommentService) *Implementation {
+func NewImplementation(postService service.PostService, commentService service.CommentService, likeService service.LikeService) *Implementation {
 	return &Implementation{
 		postService:    postService,
 		commentService: commentService,
+		likeService:    likeService,
 	}
 }
 
@@ -22,9 +25,7 @@ func NewImplementation(postService service.PostService, commentService service.C
 func (UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostRequest) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePost not implemented")
 }
-func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) (*Post, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
-}
+
 func (UnimplementedPostServiceServer) UpdatePost(context.Context, *UpdatePostRequest) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePost not implemented")
 }

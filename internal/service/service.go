@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+
 	"github.com/google/uuid"
+
 	"post/internal/model"
 )
 
@@ -18,4 +20,10 @@ type PostService interface {
 type CommentService interface {
 	AddComment(ctx context.Context, postID, userID uuid.UUID) (*model.Comment, error)
 	RemoveComment(ctx context.Context, postID, userID uuid.UUID) error
+}
+
+type LikeService interface {
+	GetLikes(ctx context.Context, postID uuid.UUID) ([]model.User, error)
+	AddLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
+	RemoveLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
 }

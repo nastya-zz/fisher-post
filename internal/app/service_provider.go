@@ -11,9 +11,11 @@ import (
 	"post/internal/config"
 	"post/internal/repository"
 	commentRepository "post/internal/repository/comment"
+	likeRepository "post/internal/repository/like"
 	postRepository "post/internal/repository/post"
 	"post/internal/service"
 	commentService "post/internal/service/comment"
+	likeService "post/internal/service/like"
 	postService "post/internal/service/post"
 	"post/internal/transaction"
 	"post/pkg/logger"
@@ -30,11 +32,12 @@ type serviceProvider struct {
 	txManager         db.TxManager
 	postRepository    repository.PostRepository
 	commentRepository repository.CommentRepository
+	likeRepository    repository.LikeRepository
 
 	postService    service.PostService
 	commentService service.CommentService
-
-	postImpl *post.Implementation
+	likeService    service.LikeService
+	postImpl       *post.Implementation
 }
 
 func newServiceProvider() *serviceProvider {
@@ -128,6 +131,14 @@ func (s *serviceProvider) PostRepository(ctx context.Context) repository.PostRep
 	return s.postRepository
 }
 
+func (s *serviceProvider) LikeRepository(ctx context.Context) repository.LikeRepository {
+	if s.likeRepository == nil {
+		s.likeRepository = likeRepository.New(s.DBClient(ctx))
+	}
+
+	return s.likeRepository
+}
+
 func (s *serviceProvider) CommentRepository(ctx context.Context) repository.CommentRepository {
 	if s.commentRepository == nil {
 		s.commentRepository = commentRepository.New(s.DBClient(ctx))
@@ -142,6 +153,7 @@ func (s *serviceProvider) PostService(ctx context.Context) service.PostService {
 			s.PostRepository(ctx),
 			s.TxManager(ctx),
 			s.UserServiceClient(ctx),
+			s.LikeRepository(ctx),
 		)
 	}
 
@@ -158,10 +170,19 @@ func (s *serviceProvider) CommentService(ctx context.Context) service.CommentSer
 	return s.commentService
 }
 
+func (s *serviceProvider) LikeService(ctx context.Context) service.LikeService {
+
+	if s.likeService == nil {
+		s.likeService = likeService.New(s.LikeRepository(ctx))
+	}
+
+	return s.likeService
+}
+
 func (s *serviceProvider) PostImpl(ctx context.Context) *post.Implementation {
 
 	if s.postImpl == nil {
-		s.postImpl = post.NewImplementation(s.PostService(ctx), s.CommentService(ctx))
+		s.postImpl = post.NewImplementation(s.PostService(ctx), s.CommentService(ctx), s.LikeService(ctx))
 	}
 
 	return s.postImpl
