@@ -19,10 +19,6 @@ func (s *serv) GetLikes(ctx context.Context, postID uuid.UUID) ([]model.User, er
 	panic("unimplemented")
 }
 
-// RemoveLike implements service.LikeService.
-func (s *serv) RemoveLike(ctx context.Context, postID uuid.UUID, userID uuid.UUID) (int, error) {
-	panic("unimplemented")
-}
 
 func New(repository repository.LikeRepository) service.LikeService {
 	return &serv{repository: repository}

@@ -10,8 +10,8 @@ import (
 	"post/internal/client/db"
 )
 
-func (r repo) Remove(ctx context.Context, postID uuid.UUID, userID uuid.UUID) error {
-	const op = "repository.like.Remove"
+func (r repo) RemoveLike(ctx context.Context, postID, userID uuid.UUID) (error) {
+	const op = "repository.like.RemoveLike"
 
 	builder := sq.Delete(likesTable).
 		Where(sq.Eq{postIdColumn: postID, userIdColumn: userID}).
@@ -30,6 +30,6 @@ func (r repo) Remove(ctx context.Context, postID uuid.UUID, userID uuid.UUID) er
 	if _, err := r.db.DB().ExecContext(ctx, q, args...); err != nil {
 		return fmt.Errorf(op+" failed to remove like: %w", err)
 	}
-
-	return nil
+	
+	return  nil
 }

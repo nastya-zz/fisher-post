@@ -10,7 +10,7 @@ import (
 	"post/internal/client/db"
 )
 
-func (r *repo) GetLikesCount(ctx context.Context, postID uuid.UUID) (int, error) {
+func (r repo) GetLikesCount(ctx context.Context, postID uuid.UUID) (int, error) {
 	const op = "repository.like.GetLikesCount"
 
 	builder := sq.Select("count(*)").

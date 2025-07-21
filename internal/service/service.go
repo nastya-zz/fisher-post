@@ -15,6 +15,8 @@ type PostService interface {
 	DeletePost(ctx context.Context, id uuid.UUID) error
 	AddLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
 	RemoveLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
+
+	UploadMedia(ctx context.Context, media *model.CreateMedia) (uuid.UUID, error)
 }
 
 type CommentService interface {
@@ -26,4 +28,10 @@ type LikeService interface {
 	GetLikes(ctx context.Context, postID uuid.UUID) ([]model.User, error)
 	AddLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
 	RemoveLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
+}
+
+
+type MinioService interface {
+	UploadFile(ctx context.Context, file []byte, filename string) (string, error)
+	RemoveFile(ctx context.Context, link string) error
 }

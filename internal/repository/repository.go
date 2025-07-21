@@ -20,7 +20,7 @@ type PostRepository interface {
 
 type LikeRepository interface {
 	Add(ctx context.Context, postID, userID uuid.UUID) error
-	Remove(ctx context.Context, postID, userID uuid.UUID) error
+	RemoveLike(ctx context.Context, postID, userID uuid.UUID) error
 	GetLikesCount(ctx context.Context, postID uuid.UUID) (int, error)
 }
 
@@ -29,4 +29,11 @@ type CommentRepository interface {
 	Add(ctx context.Context, postID, userID uuid.UUID) (*model.Comment, error)
 	Remove(ctx context.Context, postID, userID uuid.UUID) error
 	GetCommentsCount(ctx context.Context, postID uuid.UUID) (int, error)
+}
+
+type MediaRepository interface {
+	Create(ctx context.Context, media *model.CreateMedia) (uuid.UUID, error)
+	Get(ctx context.Context, id uuid.UUID) (*model.Media, error)
+	Delete(ctx context.Context, id uuid.UUID) error
+	GetByPostID(ctx context.Context, postID uuid.UUID) ([]model.Media, error)
 }
