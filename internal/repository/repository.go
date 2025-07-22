@@ -22,6 +22,7 @@ type LikeRepository interface {
 	Add(ctx context.Context, postID, userID uuid.UUID) error
 	RemoveLike(ctx context.Context, postID, userID uuid.UUID) error
 	GetLikesCount(ctx context.Context, postID uuid.UUID) (int, error)
+	GetLikes(ctx context.Context, postID uuid.UUID) ([]uuid.UUID, error) //список ид пользователей, которые лайкнули пост
 }
 
 

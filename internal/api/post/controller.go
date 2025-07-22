@@ -22,18 +22,14 @@ func NewImplementation(postService service.PostService, commentService service.C
 }
 
 /*
-func (desc.UnimplementedPostServiceServer) UploadMedia(context.Context, *desc.UploadMediaResponse) (*desc.UploadMediaResponse, error)
 
 func (UnimplementedPostServiceServer) UpdatePost(context.Context, *UpdatePostRequest) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePost not implemented")
 }
-func (UnimplementedPostServiceServer) DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeletePost not implemented")
-}
-
 func (UnimplementedPostServiceServer) AddComment(context.Context, *AddCommentRequest) (*Comment, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
 }
+func (desc.UnimplementedPostServiceServer) GetComments(context.Context, *desc.PostId) (*desc.GetCommentsResponse, error)
 
 func (UnimplementedPostServiceServer) RemoveComment(context.Context, *RemoveCommentRequest) (*RemoveCommentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveComment not implemented")

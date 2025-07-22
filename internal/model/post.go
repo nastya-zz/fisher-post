@@ -16,10 +16,10 @@ const MediaTypePhoto = "PHOTO"
 const MediaTypeVideo = "VIDEO"
 
 type Media struct {
-	ID           uuid.UUID
-	MediaType    string
-	Url          string
-	ThumbnailUrl string
+	ID           uuid.UUID `db:"media_id"`
+	MediaType    string    `db:"media_type"`
+	Url          string    `db:"url"`
+	ThumbnailUrl string    `db:"thumbnail_url"`
 }
 
 type Geolocation struct {

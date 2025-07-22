@@ -1,25 +1,18 @@
 package like
 
 import (
-	"context"
-
-	"github.com/google/uuid"
-
-	"post/internal/model"
+	"post/internal/client/user_service"
 	"post/internal/repository"
 	"post/internal/service"
 )
 
 type serv struct {
-	repository repository.LikeRepository
+	repository  repository.LikeRepository
+	userService userservice.ServiceClient
 }
 
 // GetLikes implements service.LikeService.
-func (s *serv) GetLikes(ctx context.Context, postID uuid.UUID) ([]model.User, error) {
-	panic("unimplemented")
-}
 
-
-func New(repository repository.LikeRepository) service.LikeService {
-	return &serv{repository: repository}
+func New(repository repository.LikeRepository, userService userservice.ServiceClient) service.LikeService {
+	return &serv{repository: repository, userService: userService}
 }

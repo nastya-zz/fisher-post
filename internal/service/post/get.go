@@ -38,6 +38,12 @@ func (s serv) GetPost(ctx context.Context, id uuid.UUID) (*model.Post, error) {
 		return nil, fmt.Errorf("%s %w", op, fmt.Errorf("failed to get likes count: %w", err))
 	}
 
+	media, err := s.mediaRepository.GetByPostID(ctx, post.ID)
+	if err != nil {
+		logger.Error("failed to get media", "error", err)
+		return nil, fmt.Errorf("%s %w", op, fmt.Errorf("failed to get media: %w", err))
+	}
+
 	postModel := &model.Post{
 		ID: post.ID,
 		User: model.User{
@@ -72,7 +78,19 @@ func (s serv) GetPost(ctx context.Context, id uuid.UUID) (*model.Post, error) {
 			}
 			return result
 		}(),
-		CreatedAt: post.CreatedAt,
+		Media: func() []model.Media {
+			result := make([]model.Media, 0, len(media))
+			for _, m := range media {
+				result = append(result, model.Media{
+					ID:           m.ID,
+					Url:          m.Url,
+					ThumbnailUrl: m.ThumbnailUrl,
+					MediaType:    m.MediaType,
+				})
+			}
+			return result
+		}(),
+		CreatedAt:  post.CreatedAt,
 		LikesCount: likesCount,
 	}
 

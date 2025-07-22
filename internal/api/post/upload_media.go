@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/google/uuid"
 	desc "github.com/nastya-zz/fisher-protocols/gen/post_v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,23 +17,33 @@ func (i *Implementation) UploadMedia(ctx context.Context, req *desc.UploadMediaR
 		return nil, status.Errorf(codes.InvalidArgument, "%s", err.Error())
 	}
 
-	userID, err := model.GetUuid(req.UserId)
+	postID, err := model.GetUuid(req.PostId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "%s", "Id пользователя не валидный")
 	}
 
-	i.service.UploadMedia(ctx, userID, req.Filename, req.Type)
+	createMedia := &model.DescCreateMedia{
+		File:     req.Image,
+		PostID:   postID,
+		Filename: req.Filename,
+		Type:     req.Type.String(),
+	}
+
+	mediaID, err := i.postService.UploadMedia(ctx, createMedia)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "%s", err.Error())
+	}
 
 	return &desc.UploadMediaResponse{
-		Id:     uuid.New().String(),
+		Id: mediaID.String(),
 	}, nil
 }
 
 func validateUploadMedia(req *desc.UploadMediaRequest) error {
 	var errors []string
 
-	if req.GetUserId() == "" {
-		errors = append(errors, "не указан id пользователя")
+	if req.GetPostId() == "" {
+		errors = append(errors, "не указан id поста")
 	}
 
 	if req.GetFilename() == "" {

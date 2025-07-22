@@ -6,38 +6,45 @@ import (
 	"post/internal/api/post"
 	"post/internal/client/db"
 	"post/internal/client/db/pg"
+	"post/internal/client/minio/minio"
 	userservice "post/internal/client/user_service"
 	"post/internal/closer"
 	"post/internal/config"
 	"post/internal/repository"
 	commentRepository "post/internal/repository/comment"
 	likeRepository "post/internal/repository/like"
+	mediaRepository "post/internal/repository/media"
 	postRepository "post/internal/repository/post"
 	"post/internal/service"
 	commentService "post/internal/service/comment"
 	likeService "post/internal/service/like"
+	minioService "post/internal/service/minio"
 	postService "post/internal/service/post"
 	"post/internal/transaction"
 	"post/pkg/logger"
 )
 
 type serviceProvider struct {
-	pgConfig   config.PGConfig
-	grpcConfig config.GRPCConfig
-	rmqConfig  config.RMQConfig
+	pgConfig    config.PGConfig
+	grpcConfig  config.GRPCConfig
+	rmqConfig   config.RMQConfig
+	minioConfig *config.MinioConfig
 
 	//rmqClient       broker.ClientMsgBroker
 	dbClient          db.Client
 	userServiceClient userservice.ServiceClient
+	minioClient       *minio.Client
 	txManager         db.TxManager
 	postRepository    repository.PostRepository
 	commentRepository repository.CommentRepository
 	likeRepository    repository.LikeRepository
+	mediaRepository   repository.MediaRepository
 
 	postService    service.PostService
 	commentService service.CommentService
 	likeService    service.LikeService
 	postImpl       *post.Implementation
+	minioService   service.MinioService
 }
 
 func newServiceProvider() *serviceProvider {
@@ -102,6 +109,19 @@ func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	return s.dbClient
 }
 
+func (s *serviceProvider) MinioConfig() config.MinioConfig {
+	if s.minioConfig == nil {
+		cfg, err := config.NewMinioConfig()
+		if err != nil {
+			logger.Fatal("failed to get minio config", "error", err.Error())
+		}
+
+		s.minioConfig = cfg
+	}
+
+	return *s.minioConfig
+}
+
 func (s *serviceProvider) UserServiceClient(ctx context.Context) userservice.ServiceClient {
 	if s.userServiceClient == nil {
 		userServiceClient, err := userservice.New(ctx)
@@ -113,6 +133,20 @@ func (s *serviceProvider) UserServiceClient(ctx context.Context) userservice.Ser
 	}
 
 	return s.userServiceClient
+}
+
+func (s *serviceProvider) MinioClient(ctx context.Context) *minio.Client {
+	if s.minioClient == nil {
+		cfg := s.MinioConfig()
+		cl, err := minio.New(ctx, cfg.Endpoint, cfg.AccessKey, cfg.SecretKey)
+		if err != nil {
+			logger.Fatal("failed to create minio client", "error", err)
+		}
+
+		s.minioClient = cl
+	}
+
+	return s.minioClient
 }
 
 func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
@@ -147,6 +181,15 @@ func (s *serviceProvider) CommentRepository(ctx context.Context) repository.Comm
 	return s.commentRepository
 }
 
+func (s *serviceProvider) MediaRepository(ctx context.Context) repository.MediaRepository {
+
+	if s.mediaRepository == nil {
+		s.mediaRepository = mediaRepository.New(s.DBClient(ctx))
+	}
+
+	return s.mediaRepository
+}
+
 func (s *serviceProvider) PostService(ctx context.Context) service.PostService {
 	if s.postService == nil {
 		s.postService = postService.New(
@@ -154,6 +197,8 @@ func (s *serviceProvider) PostService(ctx context.Context) service.PostService {
 			s.TxManager(ctx),
 			s.UserServiceClient(ctx),
 			s.LikeRepository(ctx),
+			s.MediaRepository(ctx),
+			s.MinioService(ctx),
 		)
 	}
 
@@ -173,10 +218,19 @@ func (s *serviceProvider) CommentService(ctx context.Context) service.CommentSer
 func (s *serviceProvider) LikeService(ctx context.Context) service.LikeService {
 
 	if s.likeService == nil {
-		s.likeService = likeService.New(s.LikeRepository(ctx))
+		s.likeService = likeService.New(s.LikeRepository(ctx), s.UserServiceClient(ctx))
 	}
 
 	return s.likeService
+}
+
+func (s *serviceProvider) MinioService(ctx context.Context) service.MinioService {
+
+	if s.minioService == nil {
+		s.minioService = minioService.New(s.MinioClient(ctx))
+	}
+
+	return s.minioService
 }
 
 func (s *serviceProvider) PostImpl(ctx context.Context) *post.Implementation {

@@ -3,6 +3,7 @@ package minio
 import (
 	"context"
 	"fmt"
+
 	miniolib "github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -13,7 +14,7 @@ type Client struct {
 	endpoint   string
 }
 
-const bucketName = "user-service"
+const bucketName = "post-service"
 
 func New(ctx context.Context, endpoint, accessKeyID, secretAccessKey string) (*Client, error) {
 

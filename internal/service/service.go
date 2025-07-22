@@ -13,10 +13,7 @@ type PostService interface {
 	UpdatePost(ctx context.Context, post *model.Post) (*model.Post, error)
 	GetPost(ctx context.Context, id uuid.UUID) (*model.Post, error)
 	DeletePost(ctx context.Context, id uuid.UUID) error
-	AddLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
-	RemoveLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
-
-	UploadMedia(ctx context.Context, media *model.CreateMedia) (uuid.UUID, error)
+	UploadMedia(ctx context.Context, media *model.DescCreateMedia) (uuid.UUID, error)
 }
 
 type CommentService interface {
@@ -25,7 +22,7 @@ type CommentService interface {
 }
 
 type LikeService interface {
-	GetLikes(ctx context.Context, postID uuid.UUID) ([]model.User, error)
+	GetLikes(ctx context.Context, postID uuid.UUID) ([]*model.User, error)
 	AddLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
 	RemoveLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
 }
