@@ -1,11 +1,8 @@
 package post
 
 import (
-	"context"
-
 	"post/internal/client/db"
 	userservice "post/internal/client/user_service"
-	"post/internal/model"
 	"post/internal/repository"
 	"post/internal/service"
 )
@@ -17,11 +14,6 @@ type serv struct {
 	txManager       db.TxManager
 	mediaRepository repository.MediaRepository
 	minioService    service.MinioService
-}
-
-func (s serv) UpdatePost(ctx context.Context, post *model.Post) (*model.Post, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func New(repository repository.PostRepository,

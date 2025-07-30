@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	desc "github.com/nastya-zz/fisher-protocols/gen/post_v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"post/internal/model"
 )
@@ -72,5 +73,23 @@ func FromModelUserToDescUser(user model.User) *desc.User {
 		Id:        user.ID.String(),
 		Username:  user.Username,
 		AvatarUrl: user.AvatarUrl,
+	}
+}
+
+func FromModelPostToDescPost(post *model.Post) *desc.Post {
+	return &desc.Post{
+		Id:          post.ID.String(),
+		User:        FromModelUserToDescUser(post.User),
+		Description: post.Description,
+		Location: &desc.LatLng{
+			Latitude:  post.Geolocation.Latitude,
+			Longitude: post.Geolocation.Longitude,
+		},
+		Media:         FromModelMediaToDescMedia(post.Media),
+		LikesCount:    int32(post.LikesCount),
+		CommentsCount: int32(post.CommentsCount),
+		FishTypes:     FromFishTypesToDescFishTypes(post.FishTypes),
+		TackleTypes:   FromFishTypesToDescTackleType(post.TackleTypes),
+		CreatedAt:     timestamppb.New(post.CreatedAt),
 	}
 }

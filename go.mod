@@ -4,11 +4,12 @@ go 1.24.0
 
 require (
 	github.com/georgysavva/scany v1.2.3
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/joho/godotenv v1.5.1
-	github.com/nastya-zz/fisher-protocols v0.0.25
+	github.com/nastya-zz/fisher-protocols v0.0.32
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6

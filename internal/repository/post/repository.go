@@ -1,10 +1,7 @@
 package post
 
 import (
-	"context"
-
 	"post/internal/client/db"
-	"post/internal/model"
 	"post/internal/repository"
 )
 
@@ -54,11 +51,6 @@ const (
 
 type repo struct {
 	db db.Client
-}
-
-func (r repo) Update(ctx context.Context, post *model.Post) (*model.Post, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func New(db db.Client) repository.PostRepository {

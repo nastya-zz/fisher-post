@@ -13,8 +13,12 @@ type PostRepository interface {
 	CreatePost(ctx context.Context, post *model.CreatePost) (*repoModel.CreatedPost, error)
 	CreatePostFishReference(ctx context.Context, postId uuid.UUID, fishId int) error
 	CreatePostTackleReference(ctx context.Context, postId uuid.UUID, tackleId int) error
-	Update(ctx context.Context, post *model.Post) (*model.Post, error)
+	UpdatePostFishReference(ctx context.Context, postId uuid.UUID, fishId int) error
+	UpdatePostTackleReference(ctx context.Context, postId uuid.UUID, tackleId int) error
+
+	Update(ctx context.Context, post *model.UpdatePost) error
 	Get(ctx context.Context, id uuid.UUID) (*repoModel.Post, error)
+	GetPosts(ctx context.Context, id uuid.UUID) ([]*repoModel.Post, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -24,7 +28,6 @@ type LikeRepository interface {
 	GetLikesCount(ctx context.Context, postID uuid.UUID) (int, error)
 	GetLikes(ctx context.Context, postID uuid.UUID) ([]uuid.UUID, error) //список ид пользователей, которые лайкнули пост
 }
-
 
 type CommentRepository interface {
 	Add(ctx context.Context, postID, userID uuid.UUID) (*model.Comment, error)

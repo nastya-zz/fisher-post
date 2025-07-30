@@ -10,8 +10,9 @@ import (
 
 type PostService interface {
 	CreatePost(ctx context.Context, post *model.CreatePost) (*model.Post, error)
-	UpdatePost(ctx context.Context, post *model.Post) (*model.Post, error)
+	UpdatePost(ctx context.Context, post *model.UpdatePost) (*model.Post, error)
 	GetPost(ctx context.Context, id uuid.UUID) (*model.Post, error)
+	GetPosts(ctx context.Context, id uuid.UUID) ([]*model.Post, error)
 	DeletePost(ctx context.Context, id uuid.UUID) error
 	UploadMedia(ctx context.Context, media *model.DescCreateMedia) (uuid.UUID, error)
 }

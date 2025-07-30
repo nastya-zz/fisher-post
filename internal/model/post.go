@@ -48,6 +48,14 @@ type Post struct {
 	TackleTypes   []Dictionary
 }
 
+type UpdatePost struct {
+	ID            uuid.UUID
+	Description   string
+	Geolocation   Geolocation
+	FishTypeIDs   []int
+	TackleTypeIDs []int
+}
+
 func GetUuid[T ~string](id T) (uuid.UUID, error) {
 	return uuid.Parse(string(id))
 }

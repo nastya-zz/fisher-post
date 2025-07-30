@@ -11,6 +11,7 @@ import (
 
 	"post/internal/converter"
 	"post/internal/model"
+	"post/pkg/helpers"
 	"post/pkg/logger"
 )
 
@@ -34,8 +35,8 @@ func (i *Implementation) CreatePost(ctx context.Context, req *desc.CreatePostReq
 			Latitude:  req.Location.Latitude,
 			Longitude: req.Location.Longitude,
 		},
-		FishTypeIDs:   getIntList(req.FishTypeIds),
-		TackleTypeIDs: getIntList(req.TackleTypeIds),
+		FishTypeIDs:   helpers.GetIntList(req.FishTypeIds),
+		TackleTypeIDs: helpers.GetIntList(req.TackleTypeIds),
 	}
 
 	createdPost, err := i.postService.CreatePost(ctx, newPost)
@@ -73,14 +74,4 @@ func validation(post *desc.CreatePostRequest) []string {
 	}
 
 	return errors
-}
-
-func getIntList(list []int32) []int {
-	result := make([]int, 0, len(list))
-
-	for _, v := range list {
-		result = append(result, int(v))
-	}
-
-	return result
 }

@@ -1,0 +1,98 @@
+package post
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/google/uuid"
+
+	"post/internal/model"
+	"post/pkg/logger"
+)
+
+func (s serv) GetPosts(ctx context.Context, id uuid.UUID) ([]*model.Post, error) {
+	const op = "service.post.GetPosts"
+
+	posts, err := s.repository.GetPosts(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf(op+" failed to get posts: %w", err)
+	}
+
+	userResponse, err := s.userService.GetUser(ctx, "", id)
+	if err != nil {
+		logger.Error("failed to get user", "error", err)
+		return nil, fmt.Errorf("%s %w", op, fmt.Errorf("failed to get user: %w", err))
+	}
+
+	user := userResponse.GetProfile()
+	ID := uuid.MustParse(user.Id)
+	Username := user.GetName()
+	AvatarUrl := user.GetAvatarPath()
+
+	postsModel := make([]*model.Post, len(posts))
+	for i, post := range posts {
+		likesCount, err := s.likeRepository.GetLikesCount(ctx, post.ID)
+		if err != nil {
+			logger.Error("failed to get likes count", "error", err)
+			return nil, fmt.Errorf("%s %w", op, fmt.Errorf("failed to get likes count: %w", err))
+		}
+
+		media, err := s.mediaRepository.GetByPostID(ctx, post.ID)
+		if err != nil {
+			logger.Error("failed to get media", "error", err)
+			return nil, fmt.Errorf("%s %w", op, fmt.Errorf("failed to get media: %w", err))
+		}
+
+		postsModel[i] = &model.Post{
+			ID: post.ID,
+			User: model.User{
+				ID:        ID,
+				Username:  Username,
+				AvatarUrl: AvatarUrl,
+			},
+			Description: post.Description,
+			Geolocation: model.Geolocation{
+				Latitude:  post.Latitude,
+				Longitude: post.Longitude,
+			},
+			TackleTypes: func() []model.Dictionary {
+				result := make([]model.Dictionary, 0, len(post.TackleTypes))
+				for _, tackle := range post.TackleTypes {
+					result = append(result, model.Dictionary{
+						ID:          tackle.ID,
+						Name:        tackle.Name,
+						Description: tackle.Description,
+					})
+				}
+				return result
+			}(),
+			FishTypes: func() []model.Dictionary {
+				result := make([]model.Dictionary, 0, len(post.FishTypes))
+				for _, fish := range post.FishTypes {
+					result = append(result, model.Dictionary{
+						ID:          fish.ID,
+						Name:        fish.Name,
+						Description: fish.Description,
+					})
+				}
+				return result
+			}(),
+			Media: func() []model.Media {
+				result := make([]model.Media, 0, len(media))
+				for _, m := range media {
+					result = append(result, model.Media{
+						ID:           m.ID,
+						Url:          m.Url,
+						ThumbnailUrl: m.ThumbnailUrl,
+						MediaType:    m.MediaType,
+					})
+				}
+				return result
+			}(),
+			CreatedAt:  post.CreatedAt,
+			LikesCount: likesCount,
+		}
+	}
+
+	return postsModel, nil
+}
