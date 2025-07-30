@@ -47,20 +47,7 @@ func New(ctx context.Context) (ServiceClient, error) {
 	}, nil
 }
 
-func (userService userService) GetUser(ctx context.Context, token string, id uuid.UUID) (*desc.GetProfileResponse, error) {
-	md := metadata.Pairs("authorization", token)
-	ctx = metadata.NewOutgoingContext(ctx, md)
 
-	profile, err := userService.cl.GetProfile(ctx, &desc.GetProfileRequest{
-		Id: id.String(),
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-
-	return profile, nil
-}
 
 func (userService userService) Close() error {
 	if userService.cl != nil {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"post/internal/client/cache"
 	"post/internal/model"
 )
 
@@ -32,4 +33,14 @@ type LikeService interface {
 type MinioService interface {
 	UploadFile(ctx context.Context, file []byte, filename string) (string, error)
 	RemoveFile(ctx context.Context, link string) error
+}
+
+type UserService interface {
+	GetUser(ctx context.Context, token string, id uuid.UUID) (*model.User, error)
+}
+
+
+type CachedUserService interface {
+	UserService
+	cache.CacheInvalidator
 }

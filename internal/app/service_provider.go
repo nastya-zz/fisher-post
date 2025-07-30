@@ -4,6 +4,9 @@ import (
 	"context"
 
 	"post/internal/api/post"
+	cache "post/internal/client/cache"
+	redis "post/internal/client/cache/redis"
+	"post/internal/client/cache/redis/invalidators"
 	"post/internal/client/db"
 	"post/internal/client/db/pg"
 	"post/internal/client/minio/minio"
@@ -16,10 +19,12 @@ import (
 	mediaRepository "post/internal/repository/media"
 	postRepository "post/internal/repository/post"
 	"post/internal/service"
+	casheduserservice "post/internal/service/cashed_user_service"
 	commentService "post/internal/service/comment"
 	likeService "post/internal/service/like"
 	minioService "post/internal/service/minio"
 	postService "post/internal/service/post"
+	userService "post/internal/service/user"
 	"post/internal/transaction"
 	"post/pkg/logger"
 )
@@ -40,11 +45,14 @@ type serviceProvider struct {
 	likeRepository    repository.LikeRepository
 	mediaRepository   repository.MediaRepository
 
-	postService    service.PostService
-	commentService service.CommentService
-	likeService    service.LikeService
-	postImpl       *post.Implementation
-	minioService   service.MinioService
+	postService       service.PostService
+	commentService    service.CommentService
+	likeService       service.LikeService
+	postImpl          *post.Implementation
+	minioService      service.MinioService
+	cachedUserService service.CachedUserService
+	cacheService      cache.Cache
+	userService       service.UserService
 }
 
 func newServiceProvider() *serviceProvider {
@@ -204,6 +212,15 @@ func (s *serviceProvider) PostService(ctx context.Context) service.PostService {
 
 	return s.postService
 }
+func (s *serviceProvider) UserService(ctx context.Context, userClient userservice.ServiceClient) service.UserService {
+	if s.userService == nil {
+		s.userService = userService.New(
+			s.UserServiceClient(ctx),
+		)
+	}
+
+	return s.userService
+}
 
 func (s *serviceProvider) CommentService(ctx context.Context) service.CommentService {
 	if s.commentService == nil {
@@ -240,4 +257,35 @@ func (s *serviceProvider) PostImpl(ctx context.Context) *post.Implementation {
 	}
 
 	return s.postImpl
+}
+
+func (s *serviceProvider) GetCachedUserService(ctx context.Context) service.CachedUserService {
+	if s.cachedUserService == nil {
+		// Базовый сервис
+		baseUserService := s.UserService(ctx, s.UserServiceClient(ctx))
+
+		// Кеш
+		cache := s.GetCacheService(ctx)
+
+		// Невалидатор
+		invalidator := invalidators.NewCacheInvalidator(cache)
+
+		// Декоратор с кешированием
+		s.cachedUserService = casheduserservice.New(baseUserService, cache, invalidator)
+	}
+
+	return s.cachedUserService
+}
+
+func (s *serviceProvider) GetCacheService(ctx context.Context) cache.Cache {
+	if s.cacheService == nil {
+		cfg := s.GetConfig()
+		s.cacheService = redis.NewRedisCache(
+			cfg.Redis.Host,
+			cfg.Redis.Password,
+			cfg.Redis.DB,
+		)
+	}
+
+	return s.cacheService
 }
