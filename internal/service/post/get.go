@@ -24,13 +24,11 @@ func (s serv) GetPost(ctx context.Context, id uuid.UUID) (*model.Post, error) {
 		return nil, fmt.Errorf("post not found")
 	}
 
-	userResponse, err := s.userService.GetUser(ctx, "", post.UserID)
+	user, err := s.userService.GetUser(ctx, "", post.UserID)
 	if err != nil {
 		logger.Error("failed to get user", "error", err)
 		return nil, fmt.Errorf("%s %w", op, fmt.Errorf("failed to get user: %w", err))
 	}
-
-	user := userResponse.GetProfile()
 
 	likesCount, err := s.likeRepository.GetLikesCount(ctx, post.ID)
 	if err != nil {
@@ -45,12 +43,8 @@ func (s serv) GetPost(ctx context.Context, id uuid.UUID) (*model.Post, error) {
 	}
 
 	postModel := &model.Post{
-		ID: post.ID,
-		User: model.User{
-			ID:        uuid.MustParse(user.Id),
-			Username:  user.GetName(),
-			AvatarUrl: user.GetAvatarPath(),
-		},
+		ID:          post.ID,
+		User:        *user,
 		Description: post.Description,
 		Geolocation: model.Geolocation{
 			Latitude:  post.Latitude,

@@ -18,16 +18,11 @@ func (s serv) GetPosts(ctx context.Context, id uuid.UUID) ([]*model.Post, error)
 		return nil, fmt.Errorf(op+" failed to get posts: %w", err)
 	}
 
-	userResponse, err := s.userService.GetUser(ctx, "", id)
+	user, err := s.userService.GetUser(ctx, "", id)
 	if err != nil {
 		logger.Error("failed to get user", "error", err)
 		return nil, fmt.Errorf("%s %w", op, fmt.Errorf("failed to get user: %w", err))
 	}
-
-	user := userResponse.GetProfile()
-	ID := uuid.MustParse(user.Id)
-	Username := user.GetName()
-	AvatarUrl := user.GetAvatarPath()
 
 	postsModel := make([]*model.Post, len(posts))
 	for i, post := range posts {
@@ -46,9 +41,9 @@ func (s serv) GetPosts(ctx context.Context, id uuid.UUID) ([]*model.Post, error)
 		postsModel[i] = &model.Post{
 			ID: post.ID,
 			User: model.User{
-				ID:        ID,
-				Username:  Username,
-				AvatarUrl: AvatarUrl,
+				ID:        user.ID,
+				Username:  user.Username,
+				AvatarUrl: user.AvatarUrl,
 			},
 			Description: post.Description,
 			Geolocation: model.Geolocation{

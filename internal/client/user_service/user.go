@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	desc "github.com/nastya-zz/fisher-protocols/gen/user_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -20,13 +19,13 @@ type Client struct {
 	md  metadata.MD
 }
 type userService struct {
-	cl desc.UserV1Client
+	Cl   desc.UserV1Client
 	conn *grpc.ClientConn
 }
 
 type ServiceClient interface {
-	GetUser(ctx context.Context, token string, id uuid.UUID) (*desc.GetProfileResponse, error)
 	Close() error
+	GetProfile(ctx context.Context, req *desc.GetProfileRequest) (*desc.GetProfileResponse, error)
 }
 
 func New(ctx context.Context) (ServiceClient, error) {
@@ -42,15 +41,15 @@ func New(ctx context.Context) (ServiceClient, error) {
 	cl := desc.NewUserV1Client(conn)
 
 	return &userService{
-		cl:   cl,
+		Cl:   cl,
 		conn: conn,
 	}, nil
 }
-
-
-
+func (s userService) GetProfile(ctx context.Context, req *desc.GetProfileRequest) (*desc.GetProfileResponse, error) {
+	return s.Cl.GetProfile(ctx, req)
+}
 func (userService userService) Close() error {
-	if userService.cl != nil {
+	if userService.Cl != nil {
 		userService.conn.Close()
 	}
 

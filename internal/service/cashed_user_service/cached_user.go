@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"post/internal/model"
+	"post/pkg/logger"
 )
 
 func (s serv) GetUser(ctx context.Context, token string, id uuid.UUID) (*model.User, error) {
@@ -19,6 +20,8 @@ func (s serv) GetUser(ctx context.Context, token string, id uuid.UUID) (*model.U
 	// Пытаемся получить из кеша
 	var cachedUser model.User
 	if err := s.cacheService.Get(ctx, cacheKey, &cachedUser); err == nil {
+		logger.Info("user found in cache", "cacheKey", cacheKey)
+
 		return &cachedUser, nil
 	}
 
@@ -31,11 +34,12 @@ func (s serv) GetUser(ctx context.Context, token string, id uuid.UUID) (*model.U
 		}
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
+	logger.Info("user NOT found in cache", "user", user)
 
 	// Кешируем успешный результат
 	if err := s.cacheService.Set(ctx, cacheKey, user, s.ttl); err != nil {
 		// Логируем ошибку кеширования, но не падаем
-		// logger.Warn("failed to cache user", "error", err)
+		logger.Warn("failed to cache user", "error", err)
 	}
 
 	return user, nil

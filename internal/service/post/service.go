@@ -2,13 +2,12 @@ package post
 
 import (
 	"post/internal/client/db"
-	userservice "post/internal/client/user_service"
 	"post/internal/repository"
 	"post/internal/service"
 )
 
 type serv struct {
-	userService     userservice.ServiceClient
+	userService     service.CachedUserService
 	repository      repository.PostRepository
 	likeRepository  repository.LikeRepository
 	txManager       db.TxManager
@@ -18,7 +17,7 @@ type serv struct {
 
 func New(repository repository.PostRepository,
 	manager db.TxManager,
-	userService userservice.ServiceClient,
+	userService service.CachedUserService,
 	likeRepository repository.LikeRepository,
 	mediaRepository repository.MediaRepository,
 	minioService service.MinioService,

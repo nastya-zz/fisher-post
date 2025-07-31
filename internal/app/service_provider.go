@@ -34,6 +34,7 @@ type serviceProvider struct {
 	grpcConfig  config.GRPCConfig
 	rmqConfig   config.RMQConfig
 	minioConfig *config.MinioConfig
+	redisConfig config.RedisConfig
 
 	//rmqClient       broker.ClientMsgBroker
 	dbClient          db.Client
@@ -83,6 +84,19 @@ func (s *serviceProvider) RMQConfig() config.RMQConfig {
 	}
 
 	return s.rmqConfig
+}
+
+func (s *serviceProvider) RedisConfig() config.RedisConfig {
+	if s.redisConfig == nil {
+		cfg, err := config.NewRedisConfig()
+		if err != nil {
+			logger.Fatal("failed to get redis config", "error", err.Error())
+		}
+
+		s.redisConfig = cfg
+	}
+
+	return s.redisConfig
 }
 
 func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
@@ -203,7 +217,7 @@ func (s *serviceProvider) PostService(ctx context.Context) service.PostService {
 		s.postService = postService.New(
 			s.PostRepository(ctx),
 			s.TxManager(ctx),
-			s.UserServiceClient(ctx),
+			s.GetCachedUserService(ctx),
 			s.LikeRepository(ctx),
 			s.MediaRepository(ctx),
 			s.MinioService(ctx),
@@ -235,7 +249,7 @@ func (s *serviceProvider) CommentService(ctx context.Context) service.CommentSer
 func (s *serviceProvider) LikeService(ctx context.Context) service.LikeService {
 
 	if s.likeService == nil {
-		s.likeService = likeService.New(s.LikeRepository(ctx), s.UserServiceClient(ctx))
+		s.likeService = likeService.New(s.LikeRepository(ctx), s.GetCachedUserService(ctx))
 	}
 
 	return s.likeService
@@ -279,12 +293,17 @@ func (s *serviceProvider) GetCachedUserService(ctx context.Context) service.Cach
 
 func (s *serviceProvider) GetCacheService(ctx context.Context) cache.Cache {
 	if s.cacheService == nil {
-		cfg := s.GetConfig()
+		cfg := s.RedisConfig()
 		s.cacheService = redis.NewRedisCache(
-			cfg.Redis.Host,
-			cfg.Redis.Password,
-			cfg.Redis.DB,
+			cfg.Config().Addr,
+			cfg.Config().Password,
+			cfg.Config().DB,
 		)
+		err := s.cacheService.Ping(ctx)
+		if err != nil {
+			logger.Fatal("failed to ping redis", "error", err.Error())
+		}
+		closer.Add(s.cacheService.Close)
 	}
 
 	return s.cacheService

@@ -25,9 +25,9 @@ func (s serv) GetLikes(ctx context.Context, postID uuid.UUID) ([]*model.User, er
 			return nil, fmt.Errorf(op+" failed to get user: %w", err)
 		}
 		users = append(users, &model.User{
-			ID:        uuid.MustParse(user.GetProfile().GetId()),
-			Username:  user.GetProfile().GetName(),
-			AvatarUrl: user.GetProfile().GetAvatarPath(),
+			ID:        user.ID,
+			Username:  user.Username,
+			AvatarUrl: user.AvatarUrl,
 		})
 	}
 

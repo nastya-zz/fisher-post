@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	desc "github.com/nastya-zz/fisher-protocols/gen/post_v1"
+	desc "github.com/nastya-zz/fisher-protocols/gen/user_v1"
 	"google.golang.org/grpc/metadata"
 
 	"post/internal/model"
@@ -23,5 +23,9 @@ func (s serv) GetUser(ctx context.Context, token string, id uuid.UUID) (*model.U
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
 
-	return profile, nil
+	return &model.User{
+		ID:        uuid.MustParse(profile.GetProfile().Id),
+		Username:  profile.GetProfile().Name,
+		AvatarUrl: profile.GetProfile().AvatarPath,
+	}, nil
 }

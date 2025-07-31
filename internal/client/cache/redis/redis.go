@@ -8,6 +8,7 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	"post/internal/client/cache"
+	"post/pkg/logger"
 )
 
 type redisCache struct {
@@ -44,4 +45,18 @@ func (r *redisCache) Set(ctx context.Context, key string, value interface{}, ttl
 
 func (r *redisCache) Delete(ctx context.Context, key string) error {
 	return r.client.Del(ctx, key).Err()
+}
+
+func (r *redisCache) Close() error {
+	return r.client.Close()
+}
+
+func (r *redisCache) Ping(ctx context.Context) error {
+	pong, err := r.client.Ping(ctx).Result()
+	if err != nil {
+		return err
+	}
+
+	logger.Info("redis started successfully", "ping", pong)
+	return nil
 }
