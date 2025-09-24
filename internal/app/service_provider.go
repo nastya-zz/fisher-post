@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"post/internal/api/post"
+	broker "post/internal/client/broker"
+	"post/internal/client/broker/rabbitmq"
 	cache "post/internal/client/cache"
 	redis "post/internal/client/cache/redis"
 	"post/internal/client/cache/redis/invalidators"
@@ -13,6 +15,8 @@ import (
 	userservice "post/internal/client/user_service"
 	"post/internal/closer"
 	"post/internal/config"
+	"post/internal/consumer"
+	rmqConsumer "post/internal/consumer/rabbitmq"
 	"post/internal/repository"
 	commentRepository "post/internal/repository/comment"
 	likeRepository "post/internal/repository/like"
@@ -21,6 +25,7 @@ import (
 	"post/internal/service"
 	casheduserservice "post/internal/service/cashed_user_service"
 	commentService "post/internal/service/comment"
+	"post/internal/service/event"
 	likeService "post/internal/service/like"
 	minioService "post/internal/service/minio"
 	postService "post/internal/service/post"
@@ -30,13 +35,14 @@ import (
 )
 
 type serviceProvider struct {
-	pgConfig    config.PGConfig
-	grpcConfig  config.GRPCConfig
-	rmqConfig   config.RMQConfig
-	minioConfig *config.MinioConfig
-	redisConfig config.RedisConfig
+	pgConfig      config.PGConfig
+	grpcConfig    config.GRPCConfig
+	rmqConfig     config.RMQConfig
+	minioConfig   *config.MinioConfig
+	redisConfig   config.RedisConfig
+	eventConsumer consumer.Consumer
 
-	//rmqClient       broker.ClientMsgBroker
+	rmqClient         broker.ClientMsgBroker
 	dbClient          db.Client
 	userServiceClient userservice.ServiceClient
 	minioClient       *minio.Client
@@ -54,6 +60,7 @@ type serviceProvider struct {
 	cachedUserService service.CachedUserService
 	cacheService      cache.Cache
 	userService       service.UserService
+	eventService      service.EventsService
 }
 
 func newServiceProvider() *serviceProvider {
@@ -169,6 +176,21 @@ func (s *serviceProvider) MinioClient(ctx context.Context) *minio.Client {
 	}
 
 	return s.minioClient
+}
+
+func (s *serviceProvider) RabbitMQClient(ctx context.Context) broker.ClientMsgBroker {
+	if s.rmqClient == nil {
+		cl, err := rabbitmq.NewRabbitMQ(ctx, s.RMQConfig().DSN())
+		if err != nil {
+			logger.Fatal("failed to create rmq client", "error", err)
+		}
+
+		closer.Add(cl.Close)
+
+		s.rmqClient = cl
+	}
+
+	return s.rmqClient
 }
 
 func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
@@ -307,4 +329,22 @@ func (s *serviceProvider) GetCacheService(ctx context.Context) cache.Cache {
 	}
 
 	return s.cacheService
+}
+func (s *serviceProvider) EventService(ctx context.Context) service.EventsService {
+	if s.eventService == nil {
+		s.eventService = event.New(
+			s.GetCachedUserService(ctx),
+			s.PostService(ctx),
+		)
+	}
+
+	return s.eventService
+}
+
+func (s *serviceProvider) EventConsumer(ctx context.Context) consumer.Consumer {
+	if s.eventConsumer == nil {
+		r := s.RabbitMQClient(ctx)
+		s.eventConsumer = rmqConsumer.NewUserConsumer(r.Connect().Channel, s.EventService(ctx), "post")
+	}
+	return s.eventConsumer
 }

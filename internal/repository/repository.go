@@ -19,6 +19,7 @@ type PostRepository interface {
 	Update(ctx context.Context, post *model.UpdatePost) error
 	Get(ctx context.Context, id uuid.UUID) (*repoModel.Post, error)
 	GetPosts(ctx context.Context, id uuid.UUID) ([]*repoModel.Post, error)
+	DeleteByUserId(ctx context.Context, userID uuid.UUID) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 

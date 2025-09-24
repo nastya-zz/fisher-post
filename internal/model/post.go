@@ -7,9 +7,9 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID
-	Username  string
-	AvatarUrl string
+	ID        uuid.UUID `json:"id"`
+	Username  string    `json:"username"`
+	AvatarUrl string    `json:"avatar_url"`
 }
 
 const MediaTypePhoto = "PHOTO"

@@ -16,6 +16,7 @@ type PostService interface {
 	GetPosts(ctx context.Context, id uuid.UUID) ([]*model.Post, error)
 	DeletePost(ctx context.Context, id uuid.UUID) error
 	UploadMedia(ctx context.Context, media *model.DescCreateMedia) (uuid.UUID, error)
+	DeleteByUserId(ctx context.Context, userId uuid.UUID) error
 }
 
 type CommentService interface {
@@ -29,7 +30,6 @@ type LikeService interface {
 	RemoveLike(ctx context.Context, postID, userID uuid.UUID) (int, error)
 }
 
-
 type MinioService interface {
 	UploadFile(ctx context.Context, file []byte, filename string) (string, error)
 	RemoveFile(ctx context.Context, link string) error
@@ -39,8 +39,11 @@ type UserService interface {
 	GetUser(ctx context.Context, token string, id uuid.UUID) (*model.User, error)
 }
 
-
 type CachedUserService interface {
 	UserService
 	cache.CacheInvalidator
+}
+
+type EventsService interface {
+	Process(ctx context.Context, event model.Event) error
 }

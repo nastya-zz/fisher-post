@@ -1,10 +1,11 @@
 module post
 
-go 1.24.0
+go 1.23.0
+
+toolchain go1.23.4
 
 require (
 	github.com/georgysavva/scany v1.2.3
-	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3
@@ -44,6 +45,7 @@ require (
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/minio/minio-go/v7 v7.0.95
+	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/redis/go-redis/v9 v9.11.0
 	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/net v0.41.0 // indirect

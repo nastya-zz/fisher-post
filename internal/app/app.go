@@ -2,11 +2,13 @@ package app
 
 import (
 	"context"
+	"net"
+
 	descAuth "github.com/nastya-zz/fisher-protocols/gen/post_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
-	"net"
+
 	"post/internal/closer"
 	"post/internal/config"
 	"post/pkg/logger"
@@ -20,6 +22,10 @@ type App struct {
 const (
 	envDev  = "dev"
 	envProd = "prod"
+)
+
+const (
+	queueName = "user"
 )
 
 func NewApp(ctx context.Context) (*App, error) {
@@ -39,7 +45,7 @@ func (a *App) Run(ctx context.Context) error {
 		closer.Wait()
 	}()
 
-	//a.runEventSender(ctx)
+	a.runEventConsumer(ctx)
 
 	return a.runGRPCServer()
 }
@@ -102,7 +108,7 @@ func (a *App) runGRPCServer() error {
 
 	return nil
 }
-
-func (a *App) runEventSender(ctx context.Context) {
-	//a.serviceProvider.eventService.StartProcessEvents(ctx, 10*time.Second)
+func (a *App) runEventConsumer(ctx context.Context) {
+	a.serviceProvider.EventConsumer(ctx)
+	a.serviceProvider.eventConsumer.Start(ctx, queueName)
 }

@@ -15,7 +15,7 @@ func (s serv) GetUser(ctx context.Context, token string, id uuid.UUID) (*model.U
 	const op = "service.cached_user.GetUser"
 
 	// Формируем ключ кеша
-	cacheKey := fmt.Sprintf("user:%s", id.String())
+	cacheKey := id.String()
 
 	// Пытаемся получить из кеша
 	var cachedUser model.User
