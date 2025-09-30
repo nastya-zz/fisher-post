@@ -20,8 +20,20 @@ type PostService interface {
 }
 
 type CommentService interface {
-	AddComment(ctx context.Context, postID, userID uuid.UUID) (*model.Comment, error)
-	RemoveComment(ctx context.Context, postID, userID uuid.UUID) error
+	// AddComment Создание комментария или ответа на комментарий
+	AddComment(ctx context.Context, postID, userID uuid.UUID, content string, parentCommentID *uuid.UUID) (*model.Comment, error)
+
+	// GetCommentsByPostID Получение всех комментариев к посту с вложенностью (один уровень)
+	GetCommentsByPostID(ctx context.Context, postID uuid.UUID, limit, offset int) ([]*model.Comment, error)
+
+	// GetReplies Получение ответов на конкретный комментарий
+	GetReplies(ctx context.Context, commentID uuid.UUID) ([]*model.Comment, error)
+
+	// RemoveComment Удаление комментария (только своим автором)
+	RemoveComment(ctx context.Context, commentID, userID uuid.UUID) error
+
+	// GetCommentsCount Подсчет общего количества комментариев к посту (включая ответы)
+	GetCommentsCount(ctx context.Context, postID uuid.UUID) (int, error)
 }
 
 type LikeService interface {

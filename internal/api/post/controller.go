@@ -20,16 +20,3 @@ func NewImplementation(postService service.PostService, commentService service.C
 		likeService:    likeService,
 	}
 }
-
-/*
-
-
-func (UnimplementedPostServiceServer) AddComment(context.Context, *AddCommentRequest) (*Comment, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
-}
-func (desc.UnimplementedPostServiceServer) GetComments(context.Context, *desc.PostId) (*desc.GetCommentsResponse, error)
-
-func (UnimplementedPostServiceServer) RemoveComment(context.Context, *RemoveCommentRequest) (*RemoveCommentResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveComment not implemented")
-}
-*/
