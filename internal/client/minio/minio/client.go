@@ -22,8 +22,7 @@ func New(ctx context.Context, endpoint, accessKeyID, secretAccessKey string) (*C
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
 		Secure: false,
 	})
-
-	if err != nil {
+	if err != nil || minioClient.IsOffline() {
 		return nil, fmt.Errorf("произошла ошибка при  создании клиента минио %w", err)
 	}
 
