@@ -262,6 +262,7 @@ func (s *serviceProvider) CommentService(ctx context.Context) service.CommentSer
 	if s.commentService == nil {
 		s.commentService = commentService.New(
 			s.CommentRepository(ctx),
+			s.GetCachedUserService(ctx),
 		)
 	}
 

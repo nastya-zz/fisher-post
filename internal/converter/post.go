@@ -93,3 +93,47 @@ func FromModelPostToDescPost(post *model.Post) *desc.Post {
 		CreatedAt:     timestamppb.New(post.CreatedAt),
 	}
 }
+
+func FromModelCommentToDescComment(comment *model.Comment) *desc.Comment {
+	// Конвертация ParentCommentID в *string
+	var parentCommentId *string
+	if comment.ParentCommentID != nil {
+		parentCommentIdStr := comment.ParentCommentID.String()
+		parentCommentId = &parentCommentIdStr
+	}
+
+	// Конвертация ReplyToUserID в *string
+	var replyToUserId *string
+	if comment.ReplyToUserID != nil {
+		replyToUserIdStr := comment.ReplyToUserID.String()
+		replyToUserId = &replyToUserIdStr
+	}
+
+	// Рекурсивная конвертация ответов
+	var replies []*desc.Comment
+	if comment.Replies != nil {
+		replies = FromModelCommentsToDescComments(comment.Replies)
+	}
+
+	return &desc.Comment{
+		Id:              comment.ID.String(),
+		User:            FromModelUserToDescUser(*comment.User),
+		PostId:          comment.PostID.String(),
+		Content:         comment.Content,
+		CreatedAt:       timestamppb.New(comment.CreatedAt),
+		UpdatedAt:       timestamppb.New(comment.UpdatedAt),
+		UserId:          comment.UserID.String(),
+		ParentCommentId: parentCommentId,
+		ReplyToUserId:   replyToUserId,
+		Replies:         replies,
+		IsReply:         comment.ParentCommentID != nil,
+	}
+}
+
+func FromModelCommentsToDescComments(comments []*model.Comment) []*desc.Comment {
+	result := make([]*desc.Comment, 0, len(comments))
+	for _, comment := range comments {
+		result = append(result, FromModelCommentToDescComment(comment))
+	}
+	return result
+}

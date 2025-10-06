@@ -31,8 +31,19 @@ type LikeRepository interface {
 }
 
 type CommentRepository interface {
-	Add(ctx context.Context, postID, userID uuid.UUID) (*model.Comment, error)
-	Remove(ctx context.Context, postID, userID uuid.UUID) error
+	// Создание комментария или ответа на комментарий
+	Add(ctx context.Context, postID, userID uuid.UUID, content string, parentCommentID *uuid.UUID) (*model.Comment, error)
+
+	// Получение всех комментариев к посту с вложенностью (один уровень)
+	GetByPostID(ctx context.Context, postID uuid.UUID, limit, offset int) ([]*model.Comment, error)
+
+	// Получение ответов на конкретный комментарий
+	GetReplies(ctx context.Context, commentID uuid.UUID) ([]*model.Comment, error)
+
+	// Удаление комментария (только своим автором)
+	Remove(ctx context.Context, commentID, userID uuid.UUID) error
+
+	// Подсчет общего количества комментариев к посту (включая ответы)
 	GetCommentsCount(ctx context.Context, postID uuid.UUID) (int, error)
 }
 

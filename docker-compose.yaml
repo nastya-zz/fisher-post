@@ -61,3 +61,22 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${GRPC_PORT}:${GRPC_PORT}"
+    environment:
+      DB_HOST: pg
+      REDIS_DSN: "redis:6379"
+      PG_DSN: "postgres://${PG_USER}:${PG_PASSWORD}@pg:5432/${PG_DATABASE_NAME}?sslmode=disable"
+      MINIO_DSN: "host.docker.internal:9000"
+      MINIO_USER_SERVICE_ACCESS_KEY: "${MINIO_USER_SERVICE_ACCESS_KEY}"
+      MINIO_USER_SERVICE_SECRET_KEY: "${MINIO_USER_SERVICE_SECRET_KEY}"
+      RMQ_DSN: "amqp://${RMQ_USER}:${RMQ_PASSWORD}@host.docker.internal:5672/"
+    depends_on:
+      - pg
+      - redis
