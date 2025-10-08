@@ -77,6 +77,9 @@ services:
       MINIO_USER_SERVICE_ACCESS_KEY: "${MINIO_USER_SERVICE_ACCESS_KEY}"
       MINIO_USER_SERVICE_SECRET_KEY: "${MINIO_USER_SERVICE_SECRET_KEY}"
       RMQ_DSN: "amqp://${RMQ_USER}:${RMQ_PASSWORD}@host.docker.internal:5672/"
+      GRPC_HOST: "${GRPC_HOST}"
+      GRPC_PORT: "${GRPC_PORT}"
+      USER_SERVICE_HOST: "${USER_SERVICE_HOST}"
     depends_on:
       - pg
       - redis

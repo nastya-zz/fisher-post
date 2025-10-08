@@ -8,13 +8,14 @@ import (
 	"google.golang.org/grpc/status"
 
 	"post/internal/model"
+	"post/internal/utils"
 )
 
 func (i *Implementation) AddLike(ctx context.Context, req *desc.AddLikeRequest) (*desc.AddLikeResponse, error) {
 
-	userID, err := model.GetUuid(req.UserId)
+	userID, err := utils.GetUserIdFromMetadata(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "%s", "Id пользователя не валидный")
+		return nil, err
 	}
 
 	postID, err := model.GetUuid(req.PostId)

@@ -3,14 +3,15 @@ package userservice
 import (
 	"context"
 	"fmt"
+	"os"
 
 	desc "github.com/nastya-zz/fisher-protocols/gen/user_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-)
 
-// Исправлено форматирование импорта: добавлена пустая строка после блока импортов для соответствия линтеру
+	"post/pkg/logger"
+)
 
 const servicePort = 50052
 
@@ -29,9 +30,11 @@ type ServiceClient interface {
 }
 
 func New(ctx context.Context) (ServiceClient, error) {
+	host := mustUserServiceHost("localhost")
 
+	logger.Info("dialing user service", "host", host)
 	conn, err := grpc.NewClient(
-		fmt.Sprintf(":%d", servicePort),
+		fmt.Sprintf("%s:%d", host, servicePort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -54,4 +57,13 @@ func (userService userService) Close() error {
 	}
 
 	return nil
+}
+
+func mustUserServiceHost(defaultVal string) string {
+	host := os.Getenv("USER_SERVICE_HOST")
+	if host == "" {
+		return defaultVal
+	}
+
+	return host
 }

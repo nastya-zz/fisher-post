@@ -11,6 +11,7 @@ import (
 
 	"post/internal/converter"
 	"post/internal/model"
+	"post/internal/utils"
 	"post/pkg/logger"
 )
 
@@ -30,10 +31,10 @@ func (i *Implementation) AddComment(ctx context.Context, req *desc.AddCommentReq
 		return nil, status.Errorf(codes.InvalidArgument, "%s: invalid post id", op)
 	}
 
-	// Парсим ID пользователя
-	userID, err := model.GetUuid(req.UserId)
+	// Извлекаем ID пользователя из метаданных
+	userID, err := utils.GetUserIdFromMetadata(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "%s: invalid user id", op)
+		return nil, err
 	}
 
 	// Создаем комментарий через сервис (пока без поддержки вложенных комментариев)
@@ -94,10 +95,10 @@ func (i *Implementation) RemoveComment(ctx context.Context, req *desc.RemoveComm
 		return nil, status.Errorf(codes.InvalidArgument, "%s: invalid comment id", op)
 	}
 
-	// Парсим ID пользователя
-	userID, err := model.GetUuid(req.UserId)
+	// Извлекаем ID пользователя из метаданных
+	userID, err := utils.GetUserIdFromMetadata(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "%s: invalid user id", op)
+		return nil, err
 	}
 
 	// Удаляем комментарий через сервис
@@ -121,10 +122,6 @@ func (i *Implementation) validateAddCommentRequest(req *desc.AddCommentRequest) 
 		errors = append(errors, "post id is required")
 	}
 
-	if req.GetUserId() == "" {
-		errors = append(errors, "user id is required")
-	}
-
 	if req.GetContent() == "" {
 		errors = append(errors, "content cannot be empty")
 	}
@@ -142,10 +139,6 @@ func (i *Implementation) validateRemoveCommentRequest(req *desc.RemoveCommentReq
 
 	if req.GetCommentId() == "" {
 		errors = append(errors, "comment id is required")
-	}
-
-	if req.GetUserId() == "" {
-		errors = append(errors, "user id is required")
 	}
 
 	return errors
