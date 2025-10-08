@@ -8,17 +8,12 @@ import (
 	desc "github.com/nastya-zz/fisher-protocols/gen/user_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/metadata"
 
 	"post/pkg/logger"
 )
 
 const servicePort = 50052
 
-type Client struct {
-	ctx context.Context
-	md  metadata.MD
-}
 type userService struct {
 	Cl   desc.UserV1Client
 	conn *grpc.ClientConn
