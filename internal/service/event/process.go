@@ -13,7 +13,7 @@ import (
 var ErrUnknownEventType = errors.New("Process.UnknownEventType")
 var ErrNotImplementedEventType = errors.New("Process.NotImplementedEventType")
 
-func (p Processor) Process(ctx context.Context, event model.Event) error {
+func (p EventService) Process(ctx context.Context, event model.Event) error {
 	const op = "process.Process"
 
 	logger.Info(op, "event", event)

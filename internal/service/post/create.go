@@ -2,6 +2,7 @@ package post
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"post/internal/model"
@@ -56,6 +57,25 @@ func (s serv) CreatePost(ctx context.Context, post *model.CreatePost) (*model.Po
 				Longitude: createdPost.Longitude,
 			},
 			CreatedAt: createdPost.CreatedAt,
+		}
+
+		body, errTx := json.Marshal(model.PostPayload{
+			ID:       createdPost.ID.String(),
+			AuthorID: createdPost.UserID.String(),
+		})
+
+		if errTx != nil {
+			return fmt.Errorf("error in marshal json body %w", errTx)
+		}
+
+		event := &model.Event{
+			Type:    model.PostCreated,
+			Payload: body,
+		}
+
+		errTx = s.eventRepository.SaveEvent(ctx, event)
+		if errTx != nil {
+			return errTx
 		}
 
 		return nil

@@ -13,6 +13,7 @@ type serv struct {
 	txManager       db.TxManager
 	mediaRepository repository.MediaRepository
 	minioService    service.MinioService
+	eventRepository repository.EventRepository
 }
 
 func New(repository repository.PostRepository,
@@ -21,6 +22,7 @@ func New(repository repository.PostRepository,
 	likeRepository repository.LikeRepository,
 	mediaRepository repository.MediaRepository,
 	minioService service.MinioService,
+	eventRepository repository.EventRepository,
 ) service.PostService {
 	return &serv{
 		repository:      repository,
@@ -29,5 +31,6 @@ func New(repository repository.PostRepository,
 		likeRepository:  likeRepository,
 		mediaRepository: mediaRepository,
 		minioService:    minioService,
+		eventRepository: eventRepository,
 	}
 }

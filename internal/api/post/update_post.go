@@ -9,6 +9,7 @@ import (
 
 	"post/internal/converter"
 	"post/internal/model"
+	"post/internal/utils"
 	"post/pkg/helpers"
 )
 
@@ -17,6 +18,14 @@ func (i *Implementation) UpdatePost(ctx context.Context, req *desc.UpdatePostReq
 	postID, err := model.GetUuid(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "%s", "Id поста не валидный")
+	}
+
+	userID, err := utils.GetUserIdFromMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "%s", "Id пользователя не валидный")
 	}
 
 	updatePost := &model.UpdatePost{
@@ -30,7 +39,7 @@ func (i *Implementation) UpdatePost(ctx context.Context, req *desc.UpdatePostReq
 		TackleTypeIDs: helpers.GetIntList(req.TackleTypeIds),
 	}
 
-	post, err := i.postService.UpdatePost(ctx, updatePost)
+	post, err := i.postService.UpdatePost(ctx, updatePost, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", "Ошибка при обновлении поста")
 	}

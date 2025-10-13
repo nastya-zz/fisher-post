@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -11,10 +12,10 @@ import (
 
 type PostService interface {
 	CreatePost(ctx context.Context, post *model.CreatePost) (*model.Post, error)
-	UpdatePost(ctx context.Context, post *model.UpdatePost) (*model.Post, error)
+	UpdatePost(ctx context.Context, post *model.UpdatePost, userID uuid.UUID) (*model.Post, error)
 	GetPost(ctx context.Context, id uuid.UUID) (*model.Post, error)
 	GetPosts(ctx context.Context, id uuid.UUID) ([]*model.Post, error)
-	DeletePost(ctx context.Context, id uuid.UUID) error
+	DeletePost(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
 	UploadMedia(ctx context.Context, media *model.DescCreateMedia) (uuid.UUID, error)
 	DeleteByUserId(ctx context.Context, userId uuid.UUID) error
 }
@@ -55,7 +56,11 @@ type CachedUserService interface {
 	UserService
 	cache.CacheInvalidator
 }
-
+type ProduceEvent interface {
+	StartProcessEvents(ctx context.Context, handlePeriod time.Duration)
+	SendMessage(ctx context.Context, event []*model.Event)
+}
 type EventsService interface {
 	Process(ctx context.Context, event model.Event) error
+	ProduceEvent
 }

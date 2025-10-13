@@ -53,3 +53,9 @@ type MediaRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetByPostID(ctx context.Context, postID uuid.UUID) ([]model.Media, error)
 }
+
+type EventRepository interface {
+	GetNewEvent(ctx context.Context, batchSize int) ([]*model.Event, error)
+	SaveEvent(ctx context.Context, event *model.Event) error
+	SetDone(ctx context.Context, id int) error
+}

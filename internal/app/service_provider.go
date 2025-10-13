@@ -17,8 +17,10 @@ import (
 	"post/internal/config"
 	"post/internal/consumer"
 	rmqConsumer "post/internal/consumer/rabbitmq"
+	rmqProducer "post/internal/producer/rabbitmq"
 	"post/internal/repository"
 	commentRepository "post/internal/repository/comment"
+	eventRepository "post/internal/repository/event"
 	likeRepository "post/internal/repository/like"
 	mediaRepository "post/internal/repository/media"
 	postRepository "post/internal/repository/post"
@@ -42,6 +44,8 @@ type serviceProvider struct {
 	redisConfig   config.RedisConfig
 	eventConsumer consumer.Consumer
 
+	postProducer rmqProducer.Producer
+
 	rmqClient         broker.ClientMsgBroker
 	dbClient          db.Client
 	userServiceClient userservice.ServiceClient
@@ -51,6 +55,7 @@ type serviceProvider struct {
 	commentRepository repository.CommentRepository
 	likeRepository    repository.LikeRepository
 	mediaRepository   repository.MediaRepository
+	eventRepository   repository.EventRepository
 
 	postService       service.PostService
 	commentService    service.CommentService
@@ -201,6 +206,14 @@ func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 	return s.txManager
 }
 
+func (s *serviceProvider) EventRepository(ctx context.Context) repository.EventRepository {
+	if s.eventRepository == nil {
+		s.eventRepository = eventRepository.NewRepository(s.DBClient(ctx))
+	}
+
+	return s.eventRepository
+}
+
 func (s *serviceProvider) PostRepository(ctx context.Context) repository.PostRepository {
 	if s.postRepository == nil {
 		s.postRepository = postRepository.New(s.DBClient(ctx))
@@ -243,6 +256,7 @@ func (s *serviceProvider) PostService(ctx context.Context) service.PostService {
 			s.LikeRepository(ctx),
 			s.MediaRepository(ctx),
 			s.MinioService(ctx),
+			s.EventRepository(ctx),
 		)
 	}
 
@@ -331,11 +345,26 @@ func (s *serviceProvider) GetCacheService(ctx context.Context) cache.Cache {
 
 	return s.cacheService
 }
+
+func (s *serviceProvider) PostProducer(ctx context.Context) rmqProducer.Producer {
+	if s.postProducer == nil {
+		postProducer, err := rmqProducer.NewPostProducer(s.RabbitMQClient(ctx).Connect())
+		if err != nil {
+			logger.Fatal("failed to create post producer", "error", err.Error())
+		}
+		// Ensure type compatibility; store the producer as the interface
+		s.postProducer = postProducer
+	}
+	return s.postProducer
+}
+
 func (s *serviceProvider) EventService(ctx context.Context) service.EventsService {
 	if s.eventService == nil {
 		s.eventService = event.New(
 			s.GetCachedUserService(ctx),
 			s.PostService(ctx),
+			s.PostProducer(ctx),
+			s.EventRepository(ctx),
 		)
 	}
 

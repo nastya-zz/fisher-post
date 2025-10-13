@@ -2,21 +2,27 @@ package post
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+
+	"github.com/google/uuid"
 
 	"post/internal/model"
 	"post/pkg/logger"
 )
 
-func (s serv) UpdatePost(ctx context.Context, post *model.UpdatePost) (*model.Post, error) {
+func (s serv) UpdatePost(ctx context.Context, post *model.UpdatePost, userID uuid.UUID) (*model.Post, error) {
 	const op = "post.service.update"
-
-	//todo: check if user is the owner of the post
 
 	existPost, err := s.repository.Get(ctx, post.ID)
 	if err != nil && existPost == nil {
 		logger.Error(op+" post not found", "error", err)
 		return nil, fmt.Errorf(op+" post not found: %w", err)
+	}
+
+	if existPost.UserID != userID {
+		logger.Error(op+" user is not the owner of the post", "error", err)
+		return nil, fmt.Errorf(op+" user is not the owner of the post: %w", err)
 	}
 
 	var postModel *model.Post
@@ -46,6 +52,25 @@ func (s serv) UpdatePost(ctx context.Context, post *model.UpdatePost) (*model.Po
 		postModel, errTx = s.GetPost(ctx, post.ID)
 		if errTx != nil {
 			return fmt.Errorf(op+" failed to get post: %w", errTx)
+		}
+
+		body, errTx := json.Marshal(model.PostPayload{
+			ID:       postModel.ID.String(),
+			AuthorID: postModel.User.ID.String(),
+		})
+
+		if errTx != nil {
+			return fmt.Errorf("error in marshal json body %w", errTx)
+		}
+
+		event := &model.Event{
+			Type:    model.PostUpdated,
+			Payload: body,
+		}
+
+		errTx = s.eventRepository.SaveEvent(ctx, event)
+		if errTx != nil {
+			return errTx
 		}
 
 		return nil

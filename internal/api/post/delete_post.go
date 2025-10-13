@@ -9,9 +9,19 @@ import (
 	"google.golang.org/grpc/status"
 
 	"post/internal/model"
+	"post/internal/utils"
 )
 
 func (i *Implementation) DeletePost(ctx context.Context, req *desc.DeletePostRequest) (*desc.DeletePostResponse, error) {
+
+	userID, err := utils.GetUserIdFromMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "%s", "Id пользователя не валидный")
+	}
+
 	postID, err := model.GetUuid(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "%s", "Id поста не валидный")
@@ -21,7 +31,7 @@ func (i *Implementation) DeletePost(ctx context.Context, req *desc.DeletePostReq
 		return nil, status.Errorf(codes.InvalidArgument, "%s", "Id поста не валидный")
 	}
 
-	err = i.postService.DeletePost(ctx, postID)
+	err = i.postService.DeletePost(ctx, postID, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", "Ошибка при удалении поста")
 	}

@@ -2,14 +2,16 @@ package post
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/google/uuid"
 
+	"post/internal/model"
 	"post/pkg/logger"
 )
 
-func (s serv) DeletePost(ctx context.Context, id uuid.UUID) error {
+func (s serv) DeletePost(ctx context.Context, id uuid.UUID, authorId uuid.UUID) error {
 	const op = "service.post.DeletePost"
 
 	media, err := s.mediaRepository.GetByPostID(ctx, id)
@@ -39,6 +41,25 @@ func (s serv) DeletePost(ctx context.Context, id uuid.UUID) error {
 
 	if len(errors) > 0 {
 		logger.Error(op, "failed to remove files", "errors", errors)
+	}
+
+	body, errTx := json.Marshal(model.PostPayload{
+		ID:       id.String(),
+		AuthorID: authorId.String(),
+	})
+
+	if errTx != nil {
+		return fmt.Errorf("error in marshal json body %w", errTx)
+	}
+
+	event := &model.Event{
+		Type:    model.PostCreated,
+		Payload: body,
+	}
+
+	errTx = s.eventRepository.SaveEvent(ctx, event)
+	if errTx != nil {
+		return errTx
 	}
 
 	return nil

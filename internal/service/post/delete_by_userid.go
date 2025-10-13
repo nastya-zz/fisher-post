@@ -2,10 +2,12 @@ package post
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/google/uuid"
 
+	"post/internal/model"
 	"post/pkg/logger"
 )
 
@@ -48,7 +50,34 @@ func (s serv) DeleteByUserId(ctx context.Context, userId uuid.UUID) error {
 			return fmt.Errorf(op+" failed to delete post: %w", err)
 		}
 
+		for _, post := range posts {
+			err = s.createDeletePostEvent(ctx, post.ID.String(), post.UserID.String())
+			if err != nil {
+				return fmt.Errorf(op+" failed to create delete post event: %w", err)
+			}
+		}
+
 		return nil
 	})
 	return nil
+}
+
+func (s serv) createDeletePostEvent(ctx context.Context, postId string, authorId string) error {
+
+	payload := model.PostPayload{
+		ID:       postId,
+		AuthorID: authorId,
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	event := &model.Event{
+		Type:    model.PostDeleted,
+		Payload: body,
+	}
+
+	return s.eventRepository.SaveEvent(ctx, event)
 }

@@ -1,14 +1,18 @@
 package event
 
 import (
+	"post/internal/producer/rabbitmq"
+	"post/internal/repository"
 	"post/internal/service"
 )
 
-type Processor struct {
+type EventService struct {
 	cachedUserService service.CachedUserService
 	postService service.PostService
+	producer rabbitmq.Producer
+	eventRepository repository.EventRepository
 }
 
-func New(cachedUserService service.CachedUserService, postService service.PostService) service.EventsService {
-	return &Processor{cachedUserService: cachedUserService, postService: postService}
+func New(cachedUserService service.CachedUserService, postService service.PostService, producer rabbitmq.Producer, eventRepository repository.EventRepository) service.EventsService {
+	return &EventService{cachedUserService: cachedUserService, postService: postService, producer: producer, eventRepository: eventRepository}
 }

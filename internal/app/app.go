@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"net"
+	"time"
 
 	descAuth "github.com/nastya-zz/fisher-protocols/gen/post_v1"
 	"google.golang.org/grpc"
@@ -46,6 +47,7 @@ func (a *App) Run(ctx context.Context) error {
 	}()
 
 	a.runEventConsumer(ctx)
+	a.runEventSender(ctx)
 
 	return a.runGRPCServer()
 }
@@ -111,4 +113,9 @@ func (a *App) runGRPCServer() error {
 func (a *App) runEventConsumer(ctx context.Context) {
 	a.serviceProvider.EventConsumer(ctx)
 	a.serviceProvider.eventConsumer.Start(ctx, queueName)
+}
+
+
+func (a *App) runEventSender(ctx context.Context) {
+	a.serviceProvider.eventService.StartProcessEvents(ctx, 10*time.Second)
 }
